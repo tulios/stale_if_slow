@@ -1,0 +1,12 @@
+class MyClass
+  include StaleIfSlow::API
+  
+  stale_if_slow :method
+  
+  def initialize
+    initialize_stale_if_slow
+  end
+  
+  def method
+  end
+end
