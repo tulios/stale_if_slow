@@ -1,5 +1,6 @@
 module StaleIfSlow
   module API
+    PREFIX = "stale_if_slow_original_"
     
     def self.included base
       base.extend ClassMethods
@@ -23,15 +24,15 @@ module StaleIfSlow
     private
     def rename_method name
       self.class.instance_eval do
-        new_name = "stale_if_slow_#{name}"
+        new_name = "#{PREFIX}#{name}"
         alias_method new_name, name
         private new_name
       end
     end
             
     def define_proxy_method_for name, generator
-      block = lambda {|*args| self.send("stale_if_slow_#{name}", *args)}
-      performer = TimeoutPerformer.new(reference: self, method: name, generator: generator, &block)
+      original_impl = lambda {|*args| self.send("#{PREFIX}#{name}", *args)}
+      performer = TimeoutPerformer.generate(reference: self, method: name, generator: generator, &original_impl)
       self.class.instance_eval do
         define_method(name) do |*args|
           performer.call(*args)

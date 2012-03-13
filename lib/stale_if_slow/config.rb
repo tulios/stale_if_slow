@@ -1,6 +1,6 @@
 module StaleIfSlow
   class Config
-    
+    OPTIONS = [:cache_store, :logger, :logger_level, :timeout, :content_timeout, :stale_content_timeout]
     attr_reader :options
     
     def initialize
@@ -19,7 +19,7 @@ module StaleIfSlow
       options[:logger].level = options[:logger_level]
     end
       
-    [:cache_store, :logger, :logger_level, :timeout, :content_timeout, :stale_content_timeout].each do |key|
+    OPTIONS.each do |key|
       define_method(key.to_s) do |value|
         @options[key] = value
       end

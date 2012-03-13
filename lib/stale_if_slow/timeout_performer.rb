@@ -1,6 +1,10 @@
 module StaleIfSlow
   class TimeoutPerformer
     
+    def self.generate params, &original_impl
+      TimeoutPerformer.new(params, &original_impl)
+    end
+    
     def initialize params, &block
       @reference, @method, @block = params[:reference], params[:method], block
       @key_generator = KeyGenerator.new(@reference, @method, params[:generator])
