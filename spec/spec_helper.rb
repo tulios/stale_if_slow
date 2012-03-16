@@ -1,5 +1,6 @@
 require 'ruby-debug'
 require 'rspec'
+require 'ostruct'
 require 'stale_if_slow'
 
 Dir['./spec/support/**/*.rb'].map {|f| require f}
