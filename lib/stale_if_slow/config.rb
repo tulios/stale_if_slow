@@ -2,7 +2,7 @@ module StaleIfSlow
   class Config
     OPTIONS = [:cache_store, :logger, :logger_level, :timeout, :content_timeout, :stale_content_timeout]
     attr_reader :options
-    
+        
     def initialize
       @options = {
         cache_store: ActiveSupport::Cache.lookup_store(:memory_store),

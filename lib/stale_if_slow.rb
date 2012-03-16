@@ -15,7 +15,7 @@ module StaleIfSlow
   class << self
     
     def config
-      @@config ||= Config.new
+      @@config ||= StaleIfSlow::Config.new
     end
     
     def configure &block
