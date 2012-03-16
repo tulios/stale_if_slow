@@ -1,6 +1,9 @@
 module StaleIfSlow
   class TimeoutPerformer
     
+    attr_reader :reference, :method, :block, :key_generator, :cache_store, :timeout, :content_timeout, :stale_content_timeout
+    attr_reader :cache_key
+    
     def self.generate params, &original_impl
       TimeoutPerformer.new(params, &original_impl)
     end
@@ -14,9 +17,9 @@ module StaleIfSlow
       @content_timeout = StaleIfSlow.config[:content_timeout]
       @stale_content_timeout = StaleIfSlow.config[:stale_content_timeout]
     end
-    
+        
     def call *args
-      cache_key = @key_generator.generate(args)
+      @cache_key = key_generator.generate(args)
       cached_content = read(cache_key)
       
       log "cache_key: #{cache_key}"
@@ -28,10 +31,10 @@ module StaleIfSlow
       if cached_content
         begin
           # Cache referer invalid, try to refresh
-          content = Timeout.timeout(@timeout, StaleIfSlow::Error) do
-            @block.call(*args)
+          content = Timeout.timeout(timeout, StaleIfSlow::Error) do
+            block.call(*args)
           end
-      
+                
           # Refreshed
           log "succeed"
           write_content(cache_key, content)
@@ -50,7 +53,7 @@ module StaleIfSlow
         
       # Don't have stale, proceed anyway
       else
-        content = @block.call(*args)
+        content = block.call(*args)
         write_content(cache_key, content)
       end
     end
@@ -61,20 +64,20 @@ module StaleIfSlow
     end
     
     def write_referer cache_key
-      write(slow_cache_referer(cache_key), "", expires_in: @content_timeout)
+      write(slow_cache_referer(cache_key), "", expires_in: content_timeout)
     end
         
     def write_content cache_key, content
       write_referer(cache_key)
-      write(cache_key, content, expires_in: @stale_content_timeout)
+      write(cache_key, content, expires_in: stale_content_timeout)
     end
     
     def read key
-      @cache_store.read key
+      cache_store.read key
     end
     
     def write key, content, params
-      @cache_store.write key, content, params
+      cache_store.write key, content, params
       content
     end
     
@@ -83,7 +86,7 @@ module StaleIfSlow
     end
     
     def log message
-      StaleIfSlow.log :info, "#{@reference.class}##{@method} :: #{message} - configured timeout: #{@timeout}"
+      StaleIfSlow.log :info, "#{reference.class}##{method} :: #{message} - configured timeout: #{timeout}"
     end
     
   end
