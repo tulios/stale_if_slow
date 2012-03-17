@@ -1,0 +1,9 @@
+language: ruby
+script: "bundle exec rspec spec"
+rvm:
+  - 1.9.2
+gemfile:
+  - Gemfile
+notifications:
+  recipients:
+    - ornelas.tulio@gmail.com
