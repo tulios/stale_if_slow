@@ -78,7 +78,7 @@ describe StaleIfSlow::API do
       impl = lambda {}
       
       StaleIfSlow::TimeoutPerformer.
-        should_receive(:new).
+        should_receive(:generate).
         with({
           reference: ref,
           method: :find_one,
@@ -87,7 +87,7 @@ describe StaleIfSlow::API do
         }, &impl)
         
       StaleIfSlow::TimeoutPerformer.
-        should_receive(:new).
+        should_receive(:generate).
         with({
           reference: ref,
           method: :find_two,

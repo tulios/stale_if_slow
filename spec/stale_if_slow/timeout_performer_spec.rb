@@ -88,7 +88,7 @@ describe StaleIfSlow::TimeoutPerformer do
   end
   
   describe "when execute method call" do
-    class Example3
+    class Example4
       include StaleIfSlow::API  
       stale_if_slow :get, :error
       def get; 7 end
@@ -102,7 +102,7 @@ describe StaleIfSlow::TimeoutPerformer do
     end
         
     let :reference do
-      Example3.new
+      Example4.new
     end
     
     let :original_method do
