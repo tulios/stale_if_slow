@@ -9,13 +9,14 @@ module StaleIfSlow
     end
     
     def initialize params, &block
+      opts = params[:opts] || {}
       @reference, @method, @block = params[:reference], params[:method], block
       @key_generator = KeyGenerator.new(@reference, @method, params[:generator])
       
       @cache_store = StaleIfSlow.config[:cache_store]
-      @timeout = StaleIfSlow.config[:timeout]
-      @content_timeout = StaleIfSlow.config[:content_timeout]
-      @stale_content_timeout = StaleIfSlow.config[:stale_content_timeout]
+      @timeout = opts[:timeout] || StaleIfSlow.config[:timeout]
+      @content_timeout = opts[:content_timeout] || StaleIfSlow.config[:content_timeout]
+      @stale_content_timeout = opts[:stale_content_timeout] || StaleIfSlow.config[:stale_content_timeout]
     end
         
     def call *args

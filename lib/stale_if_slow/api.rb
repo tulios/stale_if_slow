@@ -10,14 +10,22 @@ module StaleIfSlow
       self.class.stale_if_slow_for_methods.each do |config|
         name = config
         generator = nil
+        opts = {}
         
         if config.is_a?(Hash)
           name = config.keys.first
-          generator = config.values.first
+          value = config.values.first
+          
+          if value.is_a?(Hash)
+            generator, opts = value.delete(:key), value
+          else
+            generator = value
+          end
+          
         end
         
         rename_method name
-        define_proxy_method_for name, generator
+        define_proxy_method_for name, generator, opts
       end
     end
     
@@ -30,9 +38,9 @@ module StaleIfSlow
       end
     end
             
-    def define_proxy_method_for name, generator
+    def define_proxy_method_for name, generator, opts
       original_impl = lambda {|*args| self.send("#{PREFIX}#{name}", *args)}
-      performer = TimeoutPerformer.generate(reference: self, method: name, generator: generator, &original_impl)
+      performer = TimeoutPerformer.generate(reference: self, method: name, generator: generator, opts: opts, &original_impl)
       self.class.instance_eval do
         define_method(name) do |*args|
           performer.call(*args)

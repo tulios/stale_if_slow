@@ -63,6 +63,28 @@ describe StaleIfSlow::TimeoutPerformer do
         StaleIfSlow.config.should_receive(:[]).with(:stale_content_timeout)
       end      
     end
+    
+    describe "and overriding some defaults" do
+      subject do
+        StaleIfSlow::TimeoutPerformer.new({
+          reference: reference,
+          method: :method,
+          opts: {timeout: 0.1, content_timeout: 30.seconds, stale_content_timeout: 5.minutes}
+        }, &original_impl)
+      end
+      
+      it "should override timeout value" do
+        subject.timeout.should eql 0.1
+      end
+      
+      it "should override content timeout value" do
+        subject.content_timeout.to_i.should eql 30.seconds.to_i
+      end
+      
+      it "should override stale content timeout" do
+        subject.stale_content_timeout.to_i.should eql 5.minutes.to_i
+      end
+    end
   end
   
   describe "when execute method call" do
