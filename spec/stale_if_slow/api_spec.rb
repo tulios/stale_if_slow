@@ -2,8 +2,8 @@ require 'spec_helper'
 
 describe StaleIfSlow::API do
   class Generator
-    def initialize(method_name, reference, args); end
-    def generate; "class"; end
+    def initialize(method_name, reference); end
+    def generate(args); "class"; end
   end  
   
   class Example1

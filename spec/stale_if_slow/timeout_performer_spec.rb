@@ -152,10 +152,12 @@ describe StaleIfSlow::TimeoutPerformer do
                                                                        # value was received
           Timeout.should_receive(:timeout).with(performer.timeout, StaleIfSlow::Error).and_raise(StaleIfSlow::Error)
           performer.should_not_receive(:write_content)
+          reference.should_not_receive(original_method)
           reference.get.should eql "stale"
         end
         
         it "should propagate the exception in case of error" do
+          reference.should_not_receive(original_method)
           reference.stub(original_method).and_raise(StandardError.new("erro"))
           expect { reference.get }.to raise_error
         end

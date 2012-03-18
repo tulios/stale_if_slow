@@ -52,12 +52,12 @@ describe StaleIfSlow::KeyGenerator do
   
   describe "with class generator" do
     class Generator
-      def initialize method_name, reference, args
-        @reference, @method_name, @args = reference, method_name, args
+      def initialize method_name, reference
+        @reference, @method_name = reference, method_name
       end
       
-      def generate
-        "#{@reference.class}|#{@method_name}|#{@args.join('|')}"
+      def generate args
+        "#{@reference.class}|#{@method_name}|#{args.join('|')}"
       end
     end
     

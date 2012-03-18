@@ -39,8 +39,10 @@ module StaleIfSlow
     end
             
     def define_proxy_method_for name, generator, opts
-      original_impl = lambda {|*args| self.send("#{PREFIX}#{name}", *args)}
-      performer = TimeoutPerformer.generate(reference: self, method: name, generator: generator, opts: opts, &original_impl)
+      performer = TimeoutPerformer.generate(reference: self, method: name, generator: generator, opts: opts) do |*args|
+        self.send("#{PREFIX}#{name}", *args)
+      end
+      
       self.class.instance_eval do
         define_method(name) do |*args|
           performer.call(*args)
