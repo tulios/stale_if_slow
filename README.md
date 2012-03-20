@@ -89,7 +89,7 @@ Each key of hash is optional, replace those that you need. When you are using th
 ```ruby
 stale_if_slow using_with_class: { timeout: 0.2, key: MyKeygenerator }
 stale_if_slow using_with_proc: {
-  timeout: 0.2, key: lambda {||method_name, obj, args| "" } 
+  timeout: 0.2, key: lambda {|method_name, obj, args| "" } 
 }
 ```
 
