@@ -1,11 +1,11 @@
 ## StaleIfSlow
 [![Build Status](https://secure.travis-ci.org/tulios/stale_if_slow.png)](http://travis-ci.org/tulios/stale_if_slow)
 
-Is a quality assurance tool for methods that access external services or have slow operations that could rely on stale cache in case of problem.
+Is a quality assurance tool for methods that access external services or have slow operations that could rely on stale cache in case of problems.
 
 ## How it works
 
-StaleIfSlow creates a proxy around your methods that will cache the results after the call. The generated cache has two different durations that will be called 'fast cache' and 'slow cache'. After the first call, all following calls will return the cached value until fast cache expires. When this happens, another call of your method will be executed but only if it takes less than the configured timeout or the cached value will be returned. When the 'slow cache' expires the next call will happen without the interference of timeout, after that the whole cycle will restarts.
+StaleIfSlow creates a proxy around your methods that will cache the results after a call. The generated cache has two different durations that will be called 'fast cache' and 'slow cache', let's say for 5 and 30 minutes. After the first call, all following calls will return the cached value for 5 minutes; the duration the fast cache expires. When this happens, another call of your method will be executed. If this call takes less than the configured timeout the cache is updated and another 5 minutes period of fast cache takes place. If the call is longer than timeout the last cached value is returned. This behaviour lasts for the period of the slow cache, in our example 30 minutes. If after these 30 minutes every call takes more time than timeout, the next call can take the time it needs and both caches are updated again.
 
 The cache store used will rely on [ActiveSupport::Cache::Store](http://api.rubyonrails.org/classes/ActiveSupport/Cache/Store.html) interface.
 
@@ -88,7 +88,9 @@ Each key of hash is optional, replace those that you need. When you are using th
 
 ```ruby
 stale_if_slow using_with_class: { timeout: 0.2, key: MyKeygenerator }
-stale_if_slow using_with_proc: { timeout: 0.2, key: lambda {||method_name, obj, args| "" } }
+stale_if_slow using_with_proc: {
+  timeout: 0.2, key: lambda {||method_name, obj, args| "" } 
+}
 ```
 
 ### With Rails
