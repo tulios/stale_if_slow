@@ -75,7 +75,7 @@ end
 
 ```ruby
 stale_if_slow using_with_class: MyKeygenerator
-stale_if_slow using_with_proc: lambda {||method_name, obj, args| # A better algorithm }
+stale_if_slow using_with_proc: lambda {|method_name, obj, args| # A better algorithm }
 ```
 
 Sometimes is necessary to configure diferent times for some methods, to do that do like:
