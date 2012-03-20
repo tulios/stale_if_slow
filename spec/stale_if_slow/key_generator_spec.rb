@@ -18,11 +18,11 @@ describe StaleIfSlow::KeyGenerator do
     it "should consider the class/method and args in account" do
       args = [nil]
       key = subject.generate(args)
-      key.should eql Digest::MD5.hexdigest("#{reference.class}##{method_name}::#{args.join('|')}")
+      key.should eql "#{reference.class}##{method_name}::#{args.join('|')}"
       
       args = [1]
       key2 = subject.generate(args)
-      key2.should eql Digest::MD5.hexdigest("#{reference.class}##{method_name}::#{args.join('|')}")
+      key2.should eql "#{reference.class}##{method_name}::#{args.join('|')}"
       
       key.should_not eql key2
     end

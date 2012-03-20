@@ -1,6 +1,5 @@
 require "logger"
 require "timeout"
-require 'digest/md5'
 require "active_support"
 
 require_relative "stale_if_slow/version"

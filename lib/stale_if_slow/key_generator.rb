@@ -21,7 +21,7 @@ module StaleIfSlow
     
     private
     def default_key args
-      Digest::MD5.hexdigest("#{@reference.class}##{@method_name}::#{args.join('|')}")
+      "#{@reference.class}##{@method_name}::#{args.join('|')}"
     end
     
   end
