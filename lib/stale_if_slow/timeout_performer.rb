@@ -22,44 +22,45 @@ module StaleIfSlow
     def call *args
       @cache_key = key_generator.generate(args)
       cached_content = read(cache_key)
+            
+      if read_referer(cache_key)
+        log cache_key, "content read from cache"
+        return cached_content
+      end
       
-      log "cache_key: #{cache_key}"
-      
-      # Valid cache, return
-      return cached_content if read_referer(cache_key)
-      
-      # Stale cache to serve?
       if cached_content
         begin
-          # Cache referer invalid, try to refresh
-          content = Timeout.timeout(timeout, StaleIfSlow::Error) do
-            block.call(*args)
-          end
+          content = timeout_execution *args
                 
-          # Refreshed
-          log "succeed"
+          log cache_key, "written"
           write_content(cache_key, content)
       
         rescue StandardError => e
-          # Timeout Error, return stale
           if e.class == StaleIfSlow::Error
-            log "Invalidated by timeout"
+            log cache_key, "execution interrupted by timeout, returning stale"
             cached_content
         
           else
-            log "Invalidated by error (#{e.class}: #{e.message})"
+            log cache_key, "invalidated by error (#{e.class}: #{e.message})"
             raise e
           end
         end
         
-      # Don't have stale, proceed anyway
       else
+        log cache_key, "cold cache, proceed anyway"
+        
         content = block.call(*args)
         write_content(cache_key, content)
       end
     end
     
     private
+    def timeout_execution *args
+      Timeout.timeout(timeout, StaleIfSlow::Error) do
+        block.call(*args)
+      end      
+    end
+    
     def read_referer cache_key
       read(slow_cache_referer(cache_key))
     end
@@ -86,8 +87,8 @@ module StaleIfSlow
       "#{cache_key}_stale_if_slow_key"
     end
     
-    def log message
-      StaleIfSlow.log :info, "#{reference.class}##{method} :: #{message} - configured timeout: #{timeout}"
+    def log cache_key, message
+      StaleIfSlow.log :info, "#{reference.class}##{method} :: cache_key: #{cache_key} - #{message} - configured timeout: #{timeout}"
     end
     
   end

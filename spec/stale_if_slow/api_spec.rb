@@ -8,28 +8,21 @@ describe StaleIfSlow::API do
   
   class Example1
     include StaleIfSlow::API  
-    stale_if_slow :save
+    stale_if_slow :save, :first
     stale_if_slow find: lambda {"key"}
     stale_if_slow find_all: ::Generator
     
     def save arg; end
     def find arg=nil; end
     def find_all; end
+    def self.first; end
   end
   
   class Example2
     include StaleIfSlow::API
     stale_if_slow :save, :save, :save, :save
   end
-  
-  class Example3
-    include StaleIfSlow::API
-    stale_if_slow find_one: { timeout: 0.1, content_timeout: 30.seconds, stale_content_timeout: 5.minutes }
-    stale_if_slow find_two: { timeout: 0.1, key: ::Generator }
-    def find_one; end
-    def find_two; end
-  end
-      
+        
   describe "configuration of class" do
     it "should store the methods and generators" do
       Example1.stale_if_slow_for_methods.should_not be_nil
@@ -45,15 +38,15 @@ describe StaleIfSlow::API do
       Example2.stale_if_slow_for_methods.should have(1).item
       Example2.stale_if_slow_for_methods.first.should eql :save
     end
+    
+    it "should proxy class methods" do
+      Example1.stale_if_slow_for_class_methods.should include :first
+    end
   end
   
-  describe "when initialized" do
-    subject do
-      Example1.new
-    end
-        
+  describe "when initialized" do    
     it "should rename the original methods" do
-      subject.initialize_stale_if_slow
+      subject = Example1.new
       subject.private_methods.should include "#{StaleIfSlow::API::PREFIX}#{:save}".to_sym
       subject.private_methods.should include "#{StaleIfSlow::API::PREFIX}#{:find}".to_sym
       subject.private_methods.should include "#{StaleIfSlow::API::PREFIX}#{:find_all}".to_sym
@@ -67,13 +60,16 @@ describe StaleIfSlow::API do
 
       StaleIfSlow::TimeoutPerformer.should_receive(:generate).exactly(3).times.and_return(performer)
       
-      subject.initialize_stale_if_slow
+      subject = Example1.new
       subject.save 1
       subject.find 2
       subject.find_all
     end
     
     it "should pass the parameters for TimeoutPerformer" do
+      class Example3
+      end
+      
       ref = Example3.new
       impl = lambda {}
       
@@ -94,6 +90,14 @@ describe StaleIfSlow::API do
           generator: ::Generator,
           opts: {timeout: 0.1}
         }, &impl)
+        
+        class Example3
+          include StaleIfSlow::API
+          stale_if_slow find_one: { timeout: 0.1, content_timeout: 30.seconds, stale_content_timeout: 5.minutes }
+          stale_if_slow find_two: { timeout: 0.1, key: ::Generator }
+          def find_one; end
+          def find_two; end
+        end
         
         ref.initialize_stale_if_slow
     end

@@ -95,13 +95,11 @@ describe StaleIfSlow::TimeoutPerformer do
       def error; raise "error"; end
     end
     
-    let! :performer do
-      StaleIfSlow::TimeoutPerformer.new(reference: reference, method: :get) do
-        reference.send(original_method)
-      end
+    let :performer do
+      reference.stale_if_slow_performers[:get]
     end
         
-    let :reference do
+    let! :reference do
       Example4.new
     end
     
@@ -112,8 +110,6 @@ describe StaleIfSlow::TimeoutPerformer do
     before do
       StaleIfSlow::TimeoutPerformer.stub(:generate).and_return(performer)
       StaleIfSlow.configure { logger_level Logger::ERROR }
-      
-      reference.initialize_stale_if_slow
     end
     
     it "should return cached content if cache is still hot" do
@@ -141,7 +137,7 @@ describe StaleIfSlow::TimeoutPerformer do
         end
         
         it "should wait the configured timeout and refresh the cache" do
-          Timeout.should_receive(:timeout).with(performer.timeout, StaleIfSlow::Error).and_return(7)
+          performer.should_receive(:timeout_execution).and_return(7)
           performer.should_receive(:write_content).with(performer.cache_key, 7)
           reference.get
         end
@@ -150,7 +146,7 @@ describe StaleIfSlow::TimeoutPerformer do
           performer.stub(:read_referer).and_return(nil)
           performer.send(:write_content, performer.cache_key, "stale") # Overrides the stale value to guarantee that a cached
                                                                        # value was received
-          Timeout.should_receive(:timeout).with(performer.timeout, StaleIfSlow::Error).and_raise(StaleIfSlow::Error)
+          performer.should_receive(:timeout_execution).and_raise(StaleIfSlow::Error)
           performer.should_not_receive(:write_content)
           reference.should_not_receive(original_method)
           reference.get.should eql "stale"
