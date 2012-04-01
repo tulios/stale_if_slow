@@ -1,5 +1,6 @@
 require "logger"
 require "timeout"
+require "digest/md5"
 require "active_support"
 
 require_relative "stale_if_slow/version"
@@ -7,6 +8,7 @@ require_relative "stale_if_slow/config"
 require_relative "stale_if_slow/api"
 require_relative "stale_if_slow/timeout_performer"
 require_relative "stale_if_slow/key_generator"
+require_relative 'stale_if_slow/railtie.rb' if defined?(Rails)
 
 module StaleIfSlow
   class Error < StandardError; end
@@ -17,8 +19,9 @@ module StaleIfSlow
       @@config ||= StaleIfSlow::Config.new
     end
     
-    def configure &block
-      config.apply!(&block)
+    def configure settings_hash = nil, &block
+      config.apply!(settings_hash, &block)
+      log :info, "Initialized"
       true
     end
     
