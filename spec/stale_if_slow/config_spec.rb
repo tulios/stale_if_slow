@@ -59,22 +59,37 @@ describe StaleIfSlow::Config do
       end
     end
     
-    it "should be configured through a block" do
-      subject.apply! do
-        cache_store ActiveSupport::Cache.lookup_store(:memory_store)
-        logger Logger.new(STDOUT)
-        logger_level Logger::WARN
-        timeout 0.4
-        content_timeout 10.minutes
-        stale_content_timeout 1.hour
+    describe "when configuring" do
+      after do
+        subject[:cache_store].should eql store
+        subject[:logger].should be_instance_of Logger
+        subject[:logger_level].should eql Logger::WARN
+        subject[:timeout].should eql 0.4
+        subject[:content_timeout].to_i.should eql 10.minutes.to_i
+        subject[:stale_content_timeout].to_i.should eql 1.hour.to_i
       end
       
-      subject[:cache_store].should eql store
-      subject[:logger].should be_instance_of Logger
-      subject[:logger_level].should eql Logger::WARN
-      subject[:timeout].should eql 0.4
-      subject[:content_timeout].to_i.should eql 10.minutes.to_i
-      subject[:stale_content_timeout].to_i.should eql 1.hour.to_i
+      it "should be configured through a block" do
+        subject.apply! do
+          cache_store ActiveSupport::Cache.lookup_store(:memory_store)
+          logger Logger.new(STDOUT)
+          logger_level Logger::WARN
+          timeout 0.4
+          content_timeout 10.minutes
+          stale_content_timeout 1.hour
+        end      
+      end
+    
+      it "should be configured through a hash" do
+        subject.apply!({
+          cache_store: ActiveSupport::Cache.lookup_store(:memory_store),
+          logger: Logger.new(STDOUT),
+          logger_level: Logger::WARN,
+          timeout: 0.4,
+          content_timeout: 10.minutes,
+          stale_content_timeout: 1.hour
+        })      
+      end
     end
     
   end

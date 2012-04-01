@@ -14,8 +14,9 @@ module StaleIfSlow
       }      
     end
     
-    def apply! &block
+    def apply! settings_hash = nil, &block
       instance_exec(&block) if block_given?
+      @options.merge!(settings_hash) if settings_hash
       options[:logger].level = options[:logger_level]
     end
       
