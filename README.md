@@ -17,9 +17,39 @@ The cache store used will rely on [ActiveSupport::Cache::Store](http://api.rubyo
 gem install stale_if_slow
 ```
 
+or add to your Gemfile
+
+```ruby
+gem 'stale_if_slow'
+```
+
 ### Setup
 
-If you are not using Rails:
+#### With Rails
+
+In __config/application.rb__ or in each environment file you will have access to the configuration object, like:
+
+```ruby
+class Application < Rails::Application
+  # ...    
+    config.stale_if_slow.timeout 0.4 # In seconds, accepts float numbers
+    config.stale_if_slow.content_timeout 10.minutes
+    config.stale_if_slow.stale_content_timeout 1.hour    
+  # ...
+end
+```
+
+Some values are configured to Rails defaults, but it is possible to change those values
+
+```ruby
+config.stale_if_slow.cache_store ActiveSupport::Cache.lookup_store(:memory_store)
+config.stale_if_slow.logger Logger.new(STDOUT)
+config.stale_if_slow.logger_level Logger::ERROR
+```
+
+TODO: Talk about StaleIfSlow::Model
+
+#### Without
 
 ```ruby
 require "stale_if_slow"
@@ -92,10 +122,6 @@ stale_if_slow using_with_proc: {
   timeout: 0.2, key: lambda {|method_name, obj, args| "" } 
 }
 ```
-
-### With Rails
-
-TODO
 
 ## License
 
