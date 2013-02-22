@@ -47,15 +47,11 @@ config.stale_if_slow.logger Logger.new(STDOUT)
 config.stale_if_slow.logger_level Logger::ERROR
 ```
 
-TODO: Talk about StaleIfSlow::Model
-
 #### Without
 
 ```ruby
 require "stale_if_slow"
 ```
-
-TODO: Talk about each option
 
 ```ruby
 StaleIfSlow.configure do
@@ -78,14 +74,6 @@ class MyClass
   def find_all
     # impl
   end
-end
-```
-
-StaleIfSlow will __not__ initialize automatically, it will proxy your methods only when __initialize_stale_if_slow__ is called. You could call this method in the constructor, like:
-
-```ruby
-def initialize
-  initialize_stale_if_slow
 end
 ```
 
